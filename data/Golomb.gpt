@@ -1,0 +1,12 @@
+set terminal fig color textspecial
+#set noxtics
+#set noytics
+set xtics 1
+set xrange [0:10]
+set xlabel "Symbol"
+set ylabel "Probability"
+set output "Golomb.fig"
+set samples 11
+#set key top
+set key spacing 10
+plot 2**(-2*floor((x+2)/2)+0) title "\$2^{\\displaystyle-\\Big(\\displaystyle 2\\big\\lfloor\\displaystyle\\frac{s+2}{2}\\big\\rfloor\\Big)}\$" with linespoints
