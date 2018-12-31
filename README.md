@@ -1,1 +1,1 @@
-[Click me](https://cdn.rawgit.com/vicente-gonzalez-ruiz/Golomb-Rice_coding/master/index.html).
+[Click me](https://vicente-gonzalez-ruiz.github.io/Golomb-Rice_coding/).
