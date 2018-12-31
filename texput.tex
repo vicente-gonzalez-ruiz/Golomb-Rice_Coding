@@ -1,0 +1,222 @@
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "<none>"
+%%% End:
+
+\title{Golomb-Rice coding}
+
+\author{Vicente González Ruiz}
+
+\maketitle
+
+\section{Basics}  
+\begin{itemize}
+\item
+  When the probabilities of the symbols follow an
+  \href{https://en.wikipedia.org/wiki/Exponential_distribution}{exponential
+  distribution}, the Golomg encoder~\cite{golomb1966run} has the same efficiency than the
+  Huffman coding, but it is faster. In this case, the probabilities of
+  the symbols shoud be
+
+  \begin{equation}
+    p(s) =
+    2^{\displaystyle-\Big(\displaystyle m\big\lfloor\displaystyle\frac{s+m}{m}\big\rfloor\Big)}
+    \tag{Eq:Golomb}
+  \end{equation}
+
+  where \(s=0,1,\cdots\) is the symbol and \(m=0,1,\cdots\) is the
+  ``Golomb slope'' of the distribution.
+\item
+  If \(m=2^k\), it is possible to find a very efficient implementation
+  and the encoder is also named Rice encoder~\cite{rice1971adaptive}. In this case
+
+  \begin{equation}
+    p(s) =
+    2^{\displaystyle-\Big(2^k \displaystyle\big\lfloor\displaystyle\frac{s+2^k}{2^k}\big\rfloor\Big)}
+    \tag{Eq:Rice}
+    \label{eq:Rice}
+  \end{equation}
+\end{itemize}
+
+\img{600}{graphics/Golomb_coding.png}
+
+\begin{itemize}
+\item
+  Notice that for \(m=1\), we take the unary encoding.
+\item
+  The following distribution is for \(m=2\):
+\end{itemize}
+
+\section{Golomb Encoder}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(k\leftarrow \lceil\log_2(m)\rceil\).
+\item
+  \(r\leftarrow s~\mathrm{mod}~m\).
+\item
+  \(t\leftarrow 2^k-m\).
+\item
+  Output \(\lfloor s/m \rfloor\) using an unary code. /* Most
+  significant bits */
+\item
+  If \(r<t\):
+  \begin{enumerate}
+  \def\labelenumii{\arabic{enumii}.}
+  \tightlist
+  \item
+    Output the integer encoded in the \(k-1\) least significant bits of
+    \(r\) using a binary code. /* Least significant bits */
+  \end{enumerate}
+\item
+  Else:
+  \begin{enumerate}
+  \def\labelenumii{\arabic{enumii}.}
+  \tightlist
+  \item
+    \(r\leftarrow r+t\).
+  \item
+    Output the integer encoded in the \(k\) least significant bits of
+    \(r\) using a binary code.
+  \end{enumerate}
+\end{enumerate}
+
+\subsection{Example ($m=7$ and $s=8$)}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  {[}1{]} \(k\leftarrow \lceil\log_2(8)\rceil=3\).
+\item
+  {[}2{]} \(r\leftarrow 8~\text{mod}~7 = 1\).
+\item
+  {[}3{]} \(t\leftarrow 2^3-7 = 8-7 = 1\).
+\item
+  {[}4{]} Output \(\leftarrow \lfloor 8/7\rfloor=1\) as an unary code (2
+  bits). Therefore, output \(\leftarrow 10\).
+\item
+  {[}5{]} \(r=1\le t=1\).
+\item
+  {[}6.A{]} \(r\leftarrow 1+1=2\).
+\item
+  {[}6.B{]} Output \(r=2\) using a binary code of \(k=3\) bits.
+  Therefore, \(c(8)=10010\).
+\end{enumerate}
+
+\section{Golomb Decoder}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(k\leftarrow\lceil\log_2(m)\rceil\).
+\item
+  \(t\leftarrow 2^k-m\).
+\item
+  Let \(s\leftarrow\) the number of consecutive ones in the input (we
+  stop when we read a \(0\)).
+\item
+  Let \(x\leftarrow\) the next \(k-1\) bits in the input.
+\item
+  If \(x<t\):
+  \begin{enumerate}
+  \def\labelenumii{\arabic{enumii}.}
+  \tightlist
+  \item
+    \(s\leftarrow s\times m+x\).
+  \end{enumerate}
+\item
+  Else:
+  \begin{enumerate}
+  \def\labelenumii{\arabic{enumii}.}
+  \tightlist
+  \item
+    \(x\leftarrow x\times 2~+\) next input bit.
+  \item
+    \(s\leftarrow s\times m+x-t\).
+  \end{enumerate}
+\end{enumerate}
+
+\subsection{Example (decode 10010 for $m=7$)}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  {[}1{]} \(k\leftarrow 3\).
+\item
+  {[}2{]} \(t\leftarrow 2^k-m = 2^3-7=1\)).
+\item
+  {[}3{]} \(s\leftarrow 1\) because we found only one \(1\) in the
+  input.
+\item
+  {[}4{]} \(x\leftarrow \text{input}_{k-1} = \text{input}_2 = 01\).
+\item
+  {[}5{]} \(x=1\nless t=1\).
+\item
+  {[}6.A{]}
+  \(x\leftarrow x\times x\times 2+\text{next input bit} = x\times 1\times 2+0 = 2\).
+\item
+  {[}6.B{]} \(s\leftarrow s\times m+x-t = 1\times 7+2-1=8\).
+\end{enumerate}
+
+\subsection{Lab}
+TO-DO
+
+\section{Rice Encoder}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(m\leftarrow 2^k\).
+\item
+  Output \(\leftarrow\lfloor s/m\rfloor\) using an unary code
+  (\(\lfloor s/m\rfloor+1\) bits).
+\item
+  Output \(\leftarrow\) the \(k\) least significant bits of \(s\).
+\end{enumerate}
+
+\subsection{Example ($k=1$ and $s=7$)}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  {[}1{]} \(m\leftarrow 2^k=2^1=2\).
+\item
+  {[}2{]} Output \(\leftarrow \lfloor s/m\rfloor=\lfloor 7/2\rfloor=3\)
+  using an unary code of 4 bits. Therefore, output \(\leftarrow 1110\).
+\item
+  Output \(\leftarrow\) the \(k=1\) least significant bits of \(s=7\).
+  So, output \(\leftarrow 1\). Total output \(c(7)=11101\).
+\end{enumerate}
+
+\section{Rice Decoder}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Let \(s\) the number of consecutive ones in the input (we stop when we
+  read a 0).
+\item
+  Let \(x\) the next \(k\) input bits.
+\item
+  \(s\leftarrow s\times 2^k+x\).
+\end{enumerate}
+
+\subsubsection{Example (decode 11101 for $k=1$)}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  {[}1{]} \(s\leftarrow 3\) because we found \(3\) consecutive ones in
+  the input.
+\item
+  {[}2{]} \(x\leftarrow\) next input \(k=1\) input bits. Therefore
+  \(x\leftarrow 1\).
+\item
+  {[}3{]} \(s\leftarrow s\times 2^k+x = 3\times 2^1+1 = 6+1 = 7\).
+\end{enumerate}
+
+\subsection{Lab}
+TO-DO
+
+\bibliography{text-compression}
